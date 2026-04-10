@@ -279,7 +279,7 @@ def top_shadow_prices(
         protein_set if protein_set is not None else solution.shadow_prices.index
     )
     shadow_pr = solution.shadow_prices
-    return shadow_pr[protein_set].sort_values()[:top]
+    return shadow_pr[list(protein_set)].sort_values()[:top]
 
 
 def relax_proteomics_greedy(

@@ -33,7 +33,7 @@ from typing import Type
 
 import libsbml
 from cobra import Configuration
-from cobra.core.gene import parse_gpr
+from cobra.core.gene import GPR
 from cobra.io.sbml import (
     BOUND_MINUS_INF,
     BOUND_PLUS_INF,
@@ -167,7 +167,7 @@ def read_sbml_ec_model(
 
         if fbc_version == 1:
             LOGGER.warning(
-                "Loading SBML with fbc-v1 (models should be encoded" " using fbc-v2)"
+                "Loading SBML with fbc-v1 (models should be encoded using fbc-v2)"
             )
             conversion_properties = libsbml.ConversionProperties()
             conversion_properties.addOption(
@@ -226,8 +226,7 @@ def read_sbml_ec_model(
         info += ", {}-v{}".format(key, value)
         if key not in ["fbc", "groups", "l3v2extendedmath"]:
             LOGGER.warning(
-                "SBML package '%s' not supported by cobrapy, "
-                "information is not parsed",
+                "SBML package '%s' not supported by cobrapy, information is not parsed",
                 key,
             )
     meta["info"] = info
@@ -241,9 +240,7 @@ def read_sbml_ec_model(
     # Compartments
     # FIXME: update with new compartments
     compartments = {}
-    for (
-        compartment
-    ) in model.getListOfCompartments():  # noqa: E501 type: libsbml.Compartment
+    for compartment in model.getListOfCompartments():  # noqa: E501 type: libsbml.Compartment
         cid = _check_required(compartment, compartment.getIdAttribute(), "id")
         compartments[cid] = compartment.getName()
     geckopy_model.compartments = compartments
@@ -345,9 +342,7 @@ def read_sbml_ec_model(
 
     # Genes
     if model_fbc:
-        for (
-            gp
-        ) in model_fbc.getListOfGeneProducts():  # noqa: E501 type: libsbml.GeneProduct
+        for gp in model_fbc.getListOfGeneProducts():  # noqa: E501 type: libsbml.GeneProduct
             gid = _check_required(gp, gp.getIdAttribute(), "id")
             if f_replace and F_GENE in f_replace:
                 gid = f_replace[F_GENE](gid)
@@ -360,9 +355,7 @@ def read_sbml_ec_model(
 
             geckopy_model.genes.append(cobra_gene)
     else:
-        for (
-            cobra_reaction
-        ) in model.getListOfReactions():  # noqa: E501 type: libsbml.Reaction
+        for cobra_reaction in model.getListOfReactions():  # noqa: E501 type: libsbml.Reaction
             # fallback to notes information
             notes = _parse_notes_dict(cobra_reaction)
             if "GENE ASSOCIATION" in notes:
@@ -455,7 +448,7 @@ def read_sbml_ec_model(
                     cobra_reaction.lower_bound = p_lb.getValue()
                 else:
                     raise CobraSBMLError(
-                        "No constant bound '%s' for " "reaction: %s" % (p_lb, reaction)
+                        "No constant bound '%s' for reaction: %s" % (p_lb, reaction)
                     )
 
             ub_id = r_fbc.getUpperFluxBound()
@@ -465,20 +458,16 @@ def read_sbml_ec_model(
                     cobra_reaction.upper_bound = p_ub.getValue()
                 else:
                     raise CobraSBMLError(
-                        "No constant bound '%s' for " "reaction: %s" % (p_ub, reaction)
+                        "No constant bound '%s' for reaction: %s" % (p_ub, reaction)
                     )
 
         elif reaction.isSetKineticLaw():
             # some legacy models encode bounds in kinetic laws
             klaw = reaction.getKineticLaw()  # type: libsbml.KineticLaw
-            p_lb = klaw.getParameter(
-                "LOWER_BOUND"
-            )  # noqa: E501 type: libsbml.LocalParameter
+            p_lb = klaw.getParameter("LOWER_BOUND")  # noqa: E501 type: libsbml.LocalParameter
             if p_lb:
                 cobra_reaction.lower_bound = p_lb.getValue()
-            p_ub = klaw.getParameter(
-                "UPPER_BOUND"
-            )  # noqa: E501 type: libsbml.LocalParameter
+            p_ub = klaw.getParameter("UPPER_BOUND")  # noqa: E501 type: libsbml.LocalParameter
             if p_ub:
                 cobra_reaction.upper_bound = p_ub.getValue()
 
@@ -495,7 +484,7 @@ def read_sbml_ec_model(
             lower_bound = config.lower_bound
             cobra_reaction.lower_bound = lower_bound
             LOGGER.warning(
-                "Missing lower flux bound set to '%s' for " " reaction: '%s'",
+                "Missing lower flux bound set to '%s' for  reaction: '%s'",
                 lower_bound,
                 reaction,
             )
@@ -505,7 +494,7 @@ def read_sbml_ec_model(
             upper_bound = config.upper_bound
             cobra_reaction.upper_bound = upper_bound
             LOGGER.warning(
-                "Missing upper flux bound set to '%s' for " " reaction: '%s'",
+                "Missing upper flux bound set to '%s' for  reaction: '%s'",
                 upper_bound,
                 reaction,
             )
@@ -515,9 +504,7 @@ def read_sbml_ec_model(
 
         # parse equation
         stoichiometry = defaultdict(lambda: 0)
-        for (
-            sref
-        ) in reaction.getListOfReactants():  # noqa: E501 type: libsbml.SpeciesReference
+        for sref in reaction.getListOfReactants():  # noqa: E501 type: libsbml.SpeciesReference
             sid = _check_required(sref, sref.getSpecies(), "species")
 
             if f_replace and F_SPECIE in f_replace:
@@ -526,9 +513,7 @@ def read_sbml_ec_model(
                 _check_required(sref, sref.getStoichiometry(), "stoichiometry")
             )
 
-        for (
-            sref
-        ) in reaction.getListOfProducts():  # noqa: E501 type: libsbml.SpeciesReference
+        for sref in reaction.getListOfProducts():  # noqa: E501 type: libsbml.SpeciesReference
             sid = _check_required(sref, sref.getSpecies(), "species")
 
             if f_replace and F_SPECIE in f_replace:
@@ -558,13 +543,9 @@ def read_sbml_ec_model(
         # GPR
         if r_fbc:
             gpr = ""
-            gpa = (
-                r_fbc.getGeneProductAssociation()
-            )  # noqa: E501 type: libsbml.GeneProductAssociation
+            gpa = r_fbc.getGeneProductAssociation()  # noqa: E501 type: libsbml.GeneProductAssociation
             if gpa is not None:
-                association = (
-                    gpa.getAssociation()
-                )  # noqa: E501 type: libsbml.FbcAssociation
+                association = gpa.getAssociation()  # noqa: E501 type: libsbml.FbcAssociation
                 gpr = process_association(association)
         else:
             # fallback to notes information
@@ -589,7 +570,7 @@ def read_sbml_ec_model(
         # remove outside parenthesis, if any
         if gpr.startswith("(") and gpr.endswith(")"):
             try:
-                parse_gpr(gpr[1:-1].strip())
+                GPR(string_gpr=gpr[1:-1].strip())
                 gpr = gpr[1:-1].strip()
             except (SyntaxError, TypeError) as e:
                 LOGGER.warning(
@@ -605,9 +586,7 @@ def read_sbml_ec_model(
     obj_direction = "max"
     coefficients = {}
     if model_fbc:
-        obj_list = (
-            model_fbc.getListOfObjectives()
-        )  # noqa: E501 type: libsbml.ListOfObjectives
+        obj_list = model_fbc.getListOfObjectives()  # noqa: E501 type: libsbml.ListOfObjectives
         if obj_list is None:
             LOGGER.warning("listOfObjectives element not found")
         elif obj_list.size() == 0:
@@ -619,18 +598,14 @@ def read_sbml_ec_model(
             obj = model_fbc.getObjective(obj_id)  # type: libsbml.Objective
             obj_direction = LONG_SHORT_DIRECTION[obj.getType()]
 
-            for (
-                flux_obj
-            ) in (
-                obj.getListOfFluxObjectives()
-            ):  # noqa: E501 type: libsbml.FluxObjective
+            for flux_obj in obj.getListOfFluxObjectives():  # noqa: E501 type: libsbml.FluxObjective
                 rid = flux_obj.getReaction()
                 if f_replace and F_REACTION in f_replace:
                     rid = f_replace[F_REACTION](rid)
                 try:
                     objective_reaction = geckopy_model.reactions.get_by_id(rid)
                 except KeyError:
-                    raise CobraSBMLError("Objective reaction '%s' " "not found" % rid)
+                    raise CobraSBMLError("Objective reaction '%s' not found" % rid)
                 try:
                     coefficients[objective_reaction] = number(flux_obj.getCoefficient())
                 except ValueError as e:
@@ -640,9 +615,7 @@ def read_sbml_ec_model(
         for reaction in model.getListOfReactions():  # type: libsbml.Reaction
             if reaction.isSetKineticLaw():
                 klaw = reaction.getKineticLaw()  # type: libsbml.KineticLaw
-                p_oc = klaw.getParameter(
-                    "OBJECTIVE_COEFFICIENT"
-                )  # type: libsbml.LocalParameter
+                p_oc = klaw.getParameter("OBJECTIVE_COEFFICIENT")  # type: libsbml.LocalParameter
                 if p_oc:
                     rid = _check_required(reaction, reaction.getIdAttribute(), "id")
                     if f_replace and F_REACTION in f_replace:
@@ -650,9 +623,7 @@ def read_sbml_ec_model(
                     try:
                         objective_reaction = geckopy_model.reactions.get_by_id(rid)
                     except KeyError:
-                        raise CobraSBMLError(
-                            "Objective reaction '%s' " "not found", rid
-                        )
+                        raise CobraSBMLError("Objective reaction '%s' not found", rid)
                     try:
                         coefficients[objective_reaction] = number(p_oc.getValue())
                     except ValueError as e:
@@ -668,7 +639,7 @@ def read_sbml_ec_model(
 
     if len(coefficients) == 0:
         LOGGER.error(
-            "No objective coefficients in model. Unclear what should " "be optimized"
+            "No objective coefficients in model. Unclear what should be optimized"
         )
     set_objective(geckopy_model, coefficients)
     geckopy_model.solver.objective.direction = obj_direction
@@ -1079,16 +1050,12 @@ def write_sbml_ec_model(
             ):
                 st_coeff *= metabolite.mw
             if stoichiometry < 0:
-                sref = (
-                    reaction.createReactant()
-                )  # noqa: E501 type: libsbml.SpeciesReference
+                sref = reaction.createReactant()  # noqa: E501 type: libsbml.SpeciesReference
                 sref.setSpecies(sid)
                 sref.setStoichiometry(-stoichiometry)
                 sref.setConstant(True)
             else:
-                sref = (
-                    reaction.createProduct()
-                )  # noqa: E501 type: libsbml.SpeciesReference
+                sref = reaction.createProduct()  # noqa: E501 type: libsbml.SpeciesReference
                 sref.setSpecies(sid)
                 sref.setStoichiometry(stoichiometry)
                 sref.setConstant(True)
@@ -1132,18 +1099,14 @@ def write_sbml_ec_model(
             else:
                 gpr_new = gpr
 
-            gpa: libsbml.GeneProductAssociation = (
-                r_fbc.createGeneProductAssociation()
-            )  # noqa: E501
+            gpa: libsbml.GeneProductAssociation = r_fbc.createGeneProductAssociation()  # noqa: E501
             # uses ids to identify GeneProducts (True),
             # does not create GeneProducts (False)
             _check(gpa.setAssociation(gpr_new, True, False), "set gpr: " + gpr_new)
 
         # objective coefficients
         if reaction_coefficients.get(cobra_reaction, 0) != 0:
-            flux_obj: libsbml.FluxObjective = (
-                objective.createFluxObjective()
-            )  # noqa: E501
+            flux_obj: libsbml.FluxObjective = objective.createFluxObjective()  # noqa: E501
             flux_obj.setReaction(rid)
             flux_obj.setCoefficient(cobra_reaction.objective_coefficient)
 
