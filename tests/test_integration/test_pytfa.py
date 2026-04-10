@@ -13,6 +13,7 @@
 # limitations under the License.
 
 """Test main functionality."""
+
 import os
 
 import pytest
