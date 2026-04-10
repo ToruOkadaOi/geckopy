@@ -32,7 +32,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
 
     steps:
     - uses: actions/checkout@v4
@@ -52,10 +52,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - name: Set up Python 3.12
+    - name: Set up Python 3.13
       uses: actions/setup-python@v5
       with:
-        python-version: 3.12
+        python-version: "3.13"
     - name: Install style deps
       run: pip install flake8 flake8-docstrings flake8-bugbear black isort
     - name: flake8 (check code style)
@@ -73,10 +73,10 @@ jobs:
       contents: write
     steps:
     - uses: actions/checkout@v4
-    - name: Set up Python 3.12
+    - name: Set up Python 3.13
       uses: actions/setup-python@v5
       with:
-        python-version: 3.12
+        python-version: "3.13"
     - name: Get tag
       id: tag
       run: echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
